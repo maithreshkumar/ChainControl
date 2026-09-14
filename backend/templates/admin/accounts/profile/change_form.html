@@ -1,0 +1,13 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls %}
+
+{% block object-tools-items %}
+  {% if original and original.user_id %}
+    <li>
+      <a class="cc-password-reset" href="{% url 'admin:auth_user_password_change' original.user_id %}">
+        {% translate "Reset password" %}
+      </a>
+    </li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

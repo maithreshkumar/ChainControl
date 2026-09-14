@@ -1,0 +1,52 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block coltype %}colMS{% endblock %}
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+{% block nav-breadcrumbs %}{% endblock %}
+{% block nav-sidebar %}{% endblock %}
+
+{% block content %}
+  <div id="content-main">
+    <section class="cc-dashboard-hero">
+      <div>
+        <p class="cc-kicker">Administrative control plane</p>
+        <h1>Governance operations</h1>
+        <p>Manage identities, access roles, asset custody records, and verified ledger activity from one protected workspace.</p>
+      </div>
+      <div class="cc-assurance">
+        <span class="cc-assurance__dot"></span>
+        <span><strong>Authenticated operator</strong><small>Changes are attributable and auditable</small></span>
+      </div>
+    </section>
+
+    <div class="cc-section-heading">
+      <div><span>Control domains</span><h2>Platform administration</h2></div>
+      <p>Select a domain to inspect or manage its records.</p>
+    </div>
+    {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+  </div>
+{% endblock %}
+
+{% block sidebar %}
+  <aside id="content-related" class="cc-activity">
+    <div class="module" id="recent-actions-module">
+      <h2>{% translate 'Recent actions' %}</h2>
+      <h3>{% translate 'My actions' %}</h3>
+      {% load log %}
+      {% get_admin_log 8 as admin_log for_user user %}
+      {% if not admin_log %}
+        <p class="cc-empty-activity">No administrative changes have been recorded in this session.</p>
+      {% else %}
+        <ul class="actionlist">
+          {% for entry in admin_log %}
+            <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %} changelink{% endif %}{% if entry.is_deletion %} deletelink{% endif %}">
+              {% if entry.is_deletion or not entry.get_admin_url %}{{ entry.object_repr }}{% else %}<a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>{% endif %}
+              <br><span class="mini quiet">{{ entry.content_type.name|capfirst }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  </aside>
+{% endblock %}

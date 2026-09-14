@@ -1,0 +1,25 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | ChainControl Administration{% endblock %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <link rel="stylesheet" href="{% static 'admin/css/chaincontrol.css' %}">
+{% endblock %}
+
+{% block branding %}
+  <div class="cc-brand">
+    <a href="{% url 'admin:index' %}" class="cc-brand__mark" aria-label="ChainControl administration home">
+      <span class="cc-brand__glyph" aria-hidden="true">CC</span>
+      <span class="cc-brand__copy">
+        <strong>ChainControl</strong>
+        <small>Governance administration</small>
+      </span>
+    </a>
+  </div>
+{% endblock %}
+
+{% block nav-global %}
+  <div class="cc-environment"><span></span>Private network · Chain 1337</div>
+{% endblock %}
