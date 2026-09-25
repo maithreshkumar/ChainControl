@@ -1,4 +1,5 @@
 import pytest
+from django.core.management import call_command
 
 from apps.accounts.models import Department, Permission, Role, User, UserRole
 
@@ -23,3 +24,11 @@ def test_department_scoped_permission_isolated():
     assert manager.has_platform_permission("transfer.approve", department_id=radar.id)
     assert not manager.has_platform_permission("transfer.approve", department_id=naval.id)
 
+
+@pytest.mark.django_db
+def test_seeded_user_role_can_submit_assets_for_validator_review():
+    call_command("seed_roles")
+
+    role = Role.objects.get(code=Role.Code.USER)
+
+    assert role.permissions.filter(code="asset.mint").exists()

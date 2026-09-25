@@ -5,6 +5,10 @@ from apps.common.models import UUIDTimeStampedModel
 
 
 class Asset(UUIDTimeStampedModel):
+    class AssetType(models.TextChoices):
+        UNIQUE_PHYSICAL_ASSET = "UNIQUE_PHYSICAL_ASSET", "Unique physical asset"
+        DIGITAL_ASSET = "DIGITAL_ASSET", "Digital asset"
+
     class Kind(models.TextChoices):
         DIGITAL = "DIGITAL", "Digital"
         PHYSICAL = "PHYSICAL", "Physical"
@@ -21,6 +25,7 @@ class Asset(UUIDTimeStampedModel):
 
     name = models.CharField(max_length=180)
     kind = models.CharField(max_length=16, choices=Kind)
+    asset_type = models.CharField(max_length=32, choices=AssetType)
     classification = models.PositiveSmallIntegerField(default=10)
     department = models.ForeignKey("accounts.Department", null=True, on_delete=models.PROTECT, related_name="assets")
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, related_name="created_assets")
@@ -31,7 +36,12 @@ class Asset(UUIDTimeStampedModel):
     custody_identifier = models.CharField(max_length=180, blank=True)
 
     class Meta:
-        indexes = [models.Index(fields=["state", "department"])]
+        indexes = [models.Index(fields=["state", "department"]), models.Index(fields=["asset_type", "state"], name="assets_asse_asset_t_2ad6b6_idx")]
+
+    def save(self, *args, **kwargs):
+        if not self.asset_type:
+            self.asset_type = self.AssetType.DIGITAL_ASSET if self.kind == self.Kind.DIGITAL else self.AssetType.UNIQUE_PHYSICAL_ASSET
+        super().save(*args, **kwargs)
 
 
 class AssetVersion(UUIDTimeStampedModel):
@@ -80,4 +90,3 @@ class TransferRequest(UUIDTimeStampedModel):
     approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name="approved_transfers")
     approved_at = models.DateTimeField(null=True, blank=True)
     blockchain_transaction = models.ForeignKey("blockchain.BlockchainTransaction", null=True, blank=True, on_delete=models.PROTECT)
-

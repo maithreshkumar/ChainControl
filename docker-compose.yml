@@ -166,6 +166,15 @@ services:
     depends_on:
       - backend
 
+  observer:
+    build: ./observer
+    environment:
+      VITE_API_URL: /api/v1
+    depends_on:
+      - backend
+    ports:
+      - "5174:80"
+
   nginx:
     image: nginx:1.27-alpine
     depends_on:

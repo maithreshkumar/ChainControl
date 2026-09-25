@@ -10,9 +10,10 @@
       "cancunTime": 0,
       "zeroBaseFee": true,
       "qbft": {
-        "blockperiodseconds": 2,
+        "blockperiodseconds": 10,
+        "xemptyblockperiodseconds": 60,
         "epochlength": 30000,
-        "requesttimeoutseconds": 4
+        "requesttimeoutseconds": 20
       }
     },
     "nonce": "0x0",

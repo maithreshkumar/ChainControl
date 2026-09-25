@@ -10,21 +10,21 @@ import * as Contracts from "./index.js";
 
 declare module "@nomicfoundation/hardhat-ethers/types" {
   interface HardhatEthersHelpers extends HardhatEthersHelpersBase {
-  getContractFactory(name: 'TrustAccessManager', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.TrustAccessManager__factory>
-getContractFactory(name: 'AssetRegistry', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.AssetRegistry__factory>
+  getContractFactory(name: 'AssetRegistry', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.AssetRegistry__factory>
 getContractFactory(name: 'IdentityRegistry', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.IdentityRegistry__factory>
+getContractFactory(name: 'TrustAccessManager', signerOrOptions?: ethers.Signer | FactoryOptions): Promise<Contracts.TrustAccessManager__factory>
 
-  getContractAt(name: 'TrustAccessManager', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.TrustAccessManager>
-getContractAt(name: 'AssetRegistry', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.AssetRegistry>
+  getContractAt(name: 'AssetRegistry', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.AssetRegistry>
 getContractAt(name: 'IdentityRegistry', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.IdentityRegistry>
+getContractAt(name: 'TrustAccessManager', address: string | ethers.Addressable, signer?: ethers.Signer): Promise<Contracts.TrustAccessManager>
 
-  deployContract(name: 'TrustAccessManager', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.TrustAccessManager>
-deployContract(name: 'AssetRegistry', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.AssetRegistry>
+  deployContract(name: 'AssetRegistry', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.AssetRegistry>
 deployContract(name: 'IdentityRegistry', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.IdentityRegistry>
+deployContract(name: 'TrustAccessManager', signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.TrustAccessManager>
 
-  deployContract(name: 'TrustAccessManager', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.TrustAccessManager>
-deployContract(name: 'AssetRegistry', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.AssetRegistry>
+  deployContract(name: 'AssetRegistry', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.AssetRegistry>
 deployContract(name: 'IdentityRegistry', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.IdentityRegistry>
+deployContract(name: 'TrustAccessManager', args: any[], signerOrOptions?: ethers.Signer | DeployContractOptions): Promise<Contracts.TrustAccessManager>
 
     // default types
     getContractFactory(

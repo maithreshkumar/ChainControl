@@ -8,16 +8,24 @@ Users authenticate to Django and receive a short-lived access token. Permissions
 
 Follow `README.md` through environment setup, validator startup, contract deployment, deployment import, role seeding, and platform Admin bootstrap. Create separate browser-wallet accounts for Alice and Bob; never use governance or validator keys as user demo keys.
 
+Open the business app at `http://localhost/` and the independent read-only Observer at `http://localhost:5174/`. Sign in to Observer using an Admin, Validator, Manager, or Auditor account whose seeded role includes `observer.view`.
+
+## Catalogue and request inventory
+
+1. In Django Admin, create a category, optional subcategory, catalogue item, SKU variant, location, and stock record.
+2. Receive stock using the stock API/admin-authorized workflow so an append-only movement is created.
+3. As an employee, open **Inventory**, filter by hardware/software or search SKU, and request an available quantity.
+4. As Manager/Admin, open **Requests**, reserve/approve, issue, reject, or later return it.
+5. Observe available, reserved, on-hand, and issued quantities update without becoming negative.
+
 ## Onboard Alice
 
 1. Sign in as the platform Admin.
 2. Request an `IDENTITY_CHANGE` DID challenge and sign it with the Admin controller.
 3. Create an invitation with Alice’s email, employee ID, department, and USER role.
 4. Give Alice the one-time activation token through a controlled demo channel.
-5. Alice activates with a strong password and her controller address.
-6. Wait for the `IdentityRegistered` receipt/event. Alice’s application identity changes from `INVITED` to `ACTIVE` only after confirmation.
-
-The frontend invitation form is not yet implemented; use the documented REST endpoints until the implementation status marks it complete.
+5. Alice activates with a strong password. Django administration provisions her encrypted controller wallet; the user cannot create their own key.
+6. A validator approves the pending DID. Wait for the `IdentityRegistered` receipt/event; the identity becomes `ACTIVE` only after confirmation.
 
 ## Register and mint a digital asset
 
@@ -37,7 +45,7 @@ The MinIO object contains ciphertext. MySQL contains metadata, wrapped key mater
 4. The backend submits `governedTransfer` through the authorized transfer agent.
 5. Only after confirmation does the projection change to Bob and the request become `COMPLETED`.
 
-The API actions are `/transfers/{id}/accept/`, `/reject/`, and `/approve/`. Dedicated frontend action controls remain in progress.
+The API actions are `/transfers/{id}/accept/`, `/reject/`, and `/approve/`. The contract rejects direct owner transfer calls; only the authorized transfer agent can execute the confirmed governed transfer.
 
 ## Verify integrity
 
@@ -54,9 +62,12 @@ Call `/assets/{id}/verify/` as an authorized user. ChainControl retrieves and au
 
 ## Audit and health
 
-Auditors can inspect `/audit/`, `/security-alerts/`, `/blockchain/transactions/`, and `/blockchain/events/`. Admins can inspect `/blockchain/health/`, which performs live RPC checks against all four validators and reports actual block heights.
+Open Observer to inspect incrementally loaded blocks, full transactions, decoded calls/events, NFT owner projections, analytics, search, and live four-validator status. It polls real endpoints every five seconds and contains no fake activity.
+
+## Authorized decryption demonstration
+
+Run `python manage.py decrypt_asset ASSET_UUID --actor admin --reason "Approved demo recovery" --output /tmp/recovered.bin` inside the backend container. Confirm the audit trail contains `ADMIN_DECRYPT`, inspect the file only for the approved purpose, then delete it. Use `--cleanup` only when immediate automatic deletion is explicitly desired.
 
 ## Current demonstration boundary
 
-Backend unit/security tests, frontend build/tests, and Hardhat contract tests pass. The complete Compose E2E path has not been executed in this workspace because Docker is absent. Treat `docs/IMPLEMENTATION_STATUS.md` as authoritative before presenting any flow as verified.
-
+Backend unit/security tests, both frontend production builds, and Hardhat contract tests pass. Treat `docs/IMPLEMENTATION_STATUS.md` as authoritative for the remaining live multi-container verification boundary.

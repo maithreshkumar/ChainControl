@@ -7,9 +7,9 @@ from .models import Asset, AssetVersion, IntegrityCheck, TransferRequest
 
 @admin.register(Asset)
 class AssetAdmin(ReadOnlyAdmin):
-    list_display = ("name", "kind", "state", "token_id", "owner_projection", "department")
+    list_display = ("name", "asset_type", "state", "token_id", "owner_projection", "department")
     search_fields = ("name", "serial_number", "custody_identifier", "token_id")
-    list_filter = ("kind", "state", "classification", "department")
+    list_filter = ("asset_type", "kind", "state", "classification", "department")
 
 
 @admin.register(AssetVersion)

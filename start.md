@@ -20,6 +20,7 @@ This starts all services in the background:
 - **Django REST Framework** (Backend API & Gunicorn)
 - **Celery Worker & Celery Beat** (Receipt indexing & reconciliation)
 - **React Client & NGINX** (Web UI & Reverse Proxy)
+- **React Blockchain Observer** (Separate read-only UI on port 5174)
 
 ---
 
@@ -37,6 +38,8 @@ To verify live block production on the blockchain:
 Invoke-RestMethod -Uri http://localhost:8545 -Method Post -ContentType application/json -Body '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
 ```
 
+The current QBFT chain has a minimum 10-second block period; its verified live empty-block cadence is approximately 14 seconds rather than the previous 2 seconds. Multiple transactions waiting during the same interval are included in the next block up to its gas limit. Freshly initialized networks also request Besu's 60-second experimental empty-block delay.
+
 ---
 
 ## 3. Access ChainControl
@@ -50,6 +53,16 @@ Open your browser and navigate to:
 | **Django Administration Portal** | [http://localhost/admin/](http://localhost/admin/) | **Username**: `admin`<br>**Password**: `AdminPassword123!` |
 | **MinIO Console** | [http://localhost:9001/](http://localhost:9001/) | **Username**: `minioadmin`<br>**Password**: `minioadmin` |
 | **Hyperledger Besu RPC** | [http://localhost:8545/](http://localhost:8545/) | JSON-RPC Endpoint (Chain ID `1337`) |
+| **Blockchain Observer** | [http://localhost:5174/](http://localhost:5174/) | Sign in with an account that has `observer.view` (Admin, Validator, Manager, or Auditor after role seeding) |
+
+After pulling schema or role changes, run these idempotent commands once:
+
+```powershell
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py seed_roles
+```
+
+The Observer is intentionally separate from the business application. It can read blocks, transactions, NFT projections, analytics, and validator health, but it cannot mint, transfer, approve, freeze, or modify records.
 
 ## 4. Issue Controller Wallets from Django Administration
 
@@ -91,8 +104,8 @@ Then:
 
 1. Sign out of the `user` account.
 2. Sign in with username `validator` and password `validator`.
-3. Open **Wallet** and enter the one-time access code issued by Django administration.
-4. Claim and unlock the encrypted controller wallet.
+3. Open **Wallet** and enter the wallet access code issued by Django administration.
+4. Claim and unlock the encrypted controller wallet. After a refresh or when using another browser, enter the same code to restore the encrypted wallet copy and unlock it.
 5. Open [http://localhost/validator](http://localhost/validator).
 
 Normal users submit registrations from **Asset Registry** using **Verify DID & submit**. The asset stays `BLOCKCHAIN_PENDING` and appears in the Validator Workspace. Only the validator can press **Validate & activate**. New DID registrations similarly stay `VALIDATION_PENDING` until a validator presses **Validate DID**.

@@ -150,6 +150,41 @@ td small { color: #536b80; margin-top: 4px; font-size: 9px; }
 .recovery-box small { color: #8f7e5e; }
 .empty { min-height: 170px; display: grid; place-items: center; align-content: center; color: #50697e; text-align: center; }
 .empty p { margin: 10px 0 0; font-size: 11px; }
+.inventory-filters { display: grid; grid-template-columns: minmax(220px, 1fr) 190px auto; gap: 8px; align-items: center; }
+.search-control { position: relative; }
+.search-control svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #5f778b; }
+.search-control input { padding-left: 35px; }
+.inventory-request-form { margin: 12px 0; display: grid; grid-template-columns: 1.25fr 120px 1fr auto auto; gap: 12px; align-items: end; }
+.inventory-request-form h3, .request-card h3 { margin: 0; font-size: 16px; }
+.inventory-request-form small { color: #60788d; }
+.inventory-table { margin-top: 12px; }
+.request-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.request-card { display: grid; gap: 16px; }
+.request-card-head { display: flex; align-items: start; justify-content: space-between; gap: 16px; }
+.request-card dl { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0; }
+.request-card dl div { display: grid; gap: 4px; }
+.request-card dt { color: #60788d; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; }
+.request-card dd { margin: 0; color: #c7d5e1; font-size: 11px; }
+.request-reason { margin: 0; padding: 10px; border-radius: 8px; background: #091624; color: #8196a9; font-size: 11px; }
+.request-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.transfer-form { display: grid; grid-template-columns: 1.2fr 1fr 1fr auto; gap: 12px; align-items: end; margin-bottom: 12px; }
+.transfer-form h3, .transfer-card h3 { margin: 0; }
+.transfer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.transfer-card { display: grid; gap: 16px; }
+.transfer-parties { display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); gap: 10px; align-items: center; }
+.transfer-parties span { display: grid; min-width: 0; gap: 4px; }
+.transfer-parties small { color: #60788d; font-size: 9px; letter-spacing: .1em; }
+.transfer-parties code { overflow: hidden; text-overflow: ellipsis; color: #71899e; font-size: 9px; }
+.transfer-parties i { color: #43dcc6; text-align: center; font-style: normal; }
+.transfer-help { text-align: center; }
+.catalog-forms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.mini-form { display: flex; flex-direction: column; gap: 9px; }
+.mini-form h3 { margin: 0 0 4px; font-size: 15px; }
+.mini-form button { margin-top: auto; border: 1px solid #37736c; border-radius: 7px; padding: 9px; color: #bff8ef; background: #12302f; }
+.stock-operation { margin: 12px 0; display: grid; grid-template-columns: 1.1fr repeat(4, minmax(120px, 1fr)) auto auto; gap: 10px; align-items: end; }
+.stock-operation h3 { margin: 0; }.catalog-stock { margin-top: 12px; }
+.badge.available, .badge.reserved, .badge.issued, .badge.returned { color: #64e5d1; border-color: #2e7e73; background: #2e7e7314; }
+.badge.low-stock, .badge.unavailable, .badge.rejected, .badge.cancelled { color: #ff9999; border-color: #8f4646; background: #8f464616; }
 
-@media (max-width: 900px) { .login-shell { grid-template-columns: 1fr; }.login-story { min-height: 46vh; }.trust-row { flex-wrap: wrap; }.app-shell { grid-template-columns: 76px 1fr; }aside .brand { font-size: 0; justify-content: center; }aside nav a { justify-content: center; font-size: 0; }.operator { grid-template-columns: 1fr; justify-items: center; }.operator div { display: none; }.stats, .validator-grid { grid-template-columns: repeat(2, 1fr); }.asset-form, .wallet-setup form { grid-template-columns: 1fr 1fr; }.split, .wallet-layout { grid-template-columns: 1fr; }.validator-summary { grid-template-columns: 1fr 1fr; }.validator-policy { grid-column: 1 / -1; }.wallet-unlock { grid-template-columns: 1fr; } }
-@media (max-width: 560px) { .login-story { padding: 28px 24px; }.story-copy h1 { font-size: 46px; }.login-panel { padding: 36px 24px; }.app-shell { display: block; }aside { position: static; width: 100%; height: auto; padding: 12px; }aside .brand, .operator { display: none; }aside nav { display: flex; overflow-x: auto; }aside nav a { flex: 0 0 auto; }.workspace > header { padding: 0 18px; }.page { padding: 24px 16px; }.stats, .validator-grid, .asset-form, .wallet-setup form, .validator-summary { grid-template-columns: 1fr; }.page-title { align-items: start; flex-direction: column; }.page-actions { width: 100%; flex-wrap: wrap; }.page-actions button { flex: 1; }.status-pill { display: none; }.identity-card { grid-template-columns: 55px 1fr; }.identity-card > .badge { grid-column: 1 / -1; }.table-wrap { overflow-x: auto; }.review-card { grid-template-columns: 40px 1fr; }.review-card > button { grid-column: 1 / -1; }.wallet-card { grid-template-columns: 50px 1fr; }.wallet-card-controls { grid-column: 1 / -1; width: 100%; justify-items: stretch; }.wallet-actions, .recovery-box { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .login-shell { grid-template-columns: 1fr; }.login-story { min-height: 46vh; }.trust-row { flex-wrap: wrap; }.app-shell { grid-template-columns: 76px 1fr; }aside .brand { font-size: 0; justify-content: center; }aside nav a { justify-content: center; font-size: 0; }.operator { grid-template-columns: 1fr; justify-items: center; }.operator div { display: none; }.stats, .validator-grid { grid-template-columns: repeat(2, 1fr); }.asset-form, .wallet-setup form, .inventory-request-form, .transfer-form, .stock-operation { grid-template-columns: 1fr 1fr; }.catalog-forms { grid-template-columns: repeat(2, 1fr); }.split, .wallet-layout, .request-grid, .transfer-grid { grid-template-columns: 1fr; }.validator-summary { grid-template-columns: 1fr 1fr; }.validator-policy { grid-column: 1 / -1; }.wallet-unlock { grid-template-columns: 1fr; }.inventory-filters { grid-template-columns: 1fr 1fr auto; } }
+@media (max-width: 560px) { .login-story { padding: 28px 24px; }.story-copy h1 { font-size: 46px; }.login-panel { padding: 36px 24px; }.app-shell { display: block; }aside { position: static; width: 100%; height: auto; padding: 12px; }aside .brand, .operator { display: none; }aside nav { display: flex; overflow-x: auto; }aside nav a { flex: 0 0 auto; }.workspace > header { padding: 0 18px; }.page { padding: 24px 16px; }.stats, .validator-grid, .asset-form, .wallet-setup form, .validator-summary, .catalog-forms, .stock-operation { grid-template-columns: 1fr; }.page-title { align-items: start; flex-direction: column; }.page-actions { width: 100%; flex-wrap: wrap; }.page-actions button { flex: 1; }.status-pill { display: none; }.identity-card { grid-template-columns: 55px 1fr; }.identity-card > .badge { grid-column: 1 / -1; }.table-wrap { overflow-x: auto; }.review-card { grid-template-columns: 40px 1fr; }.review-card > button { grid-column: 1 / -1; }.wallet-card { grid-template-columns: 50px 1fr; }.wallet-card-controls { grid-column: 1 / -1; width: 100%; justify-items: stretch; }.wallet-actions, .recovery-box { grid-template-columns: 1fr; } }

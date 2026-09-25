@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "apps.identities",
     "apps.blockchain",
     "apps.assets",
+    "apps.inventory",
     "apps.audit",
 ]
 

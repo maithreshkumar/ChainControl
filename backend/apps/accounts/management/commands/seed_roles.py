@@ -7,24 +7,30 @@ from apps.accounts.models import Permission, Role
 ROLE_PERMISSIONS = {
     Role.Code.ADMIN: {
         "identity.create", "identity.view", "identity.view_all", "identity.revoke",
-        "role.assign", "role.revoke", "asset.create", "asset.mint", "asset.view",
+        "role.assign", "role.revoke", "asset.create", "asset.mint", "asset.decrypt", "asset.view",
         "asset.view_all", "asset.assign", "asset.transfer", "transfer.approve",
         "transfer.view_all", "audit.view", "security.view", "blockchain.view", "blockchain.health",
+        "inventory.view", "inventory.view_all", "inventory.catalog.manage", "inventory.stock.manage",
+        "inventory.request", "inventory.request.approve", "inventory.issue", "inventory.audit", "observer.view",
     },
     Role.Code.VALIDATOR: {
         "identity.view", "identity.view_all", "identity.validate",
         "asset.view", "asset.view_all", "asset.activate",
-        "audit.view", "blockchain.view",
+        "audit.view", "blockchain.view", "blockchain.health",
+        "inventory.view", "inventory.view_all", "inventory.request", "inventory.audit", "observer.view",
     },
     Role.Code.MANAGER: {
         "identity.view", "asset.view", "asset.transfer", "transfer.approve",
-        "transfer.view_all", "audit.view", "blockchain.view",
+        "transfer.view_all", "audit.view", "blockchain.view", "blockchain.health",
+        "inventory.view", "inventory.view_all", "inventory.request", "inventory.request.approve",
+        "inventory.issue", "inventory.audit", "observer.view",
     },
     Role.Code.AUDITOR: {
         "identity.view_all", "asset.view_all", "transfer.view_all", "audit.view",
         "security.view", "blockchain.view", "blockchain.health",
+        "inventory.view", "inventory.view_all", "inventory.audit", "observer.view",
     },
-    Role.Code.USER: {"identity.view", "asset.view", "asset.mint", "asset.transfer"},
+    Role.Code.USER: {"identity.view", "asset.view", "asset.mint", "asset.transfer", "inventory.view", "inventory.request"},
 }
 
 

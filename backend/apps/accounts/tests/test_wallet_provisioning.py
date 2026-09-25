@@ -175,7 +175,7 @@ def test_invitee_cannot_choose_or_create_a_controller_wallet():
 
 
 @pytest.mark.django_db
-def test_user_claims_an_admin_issued_wallet_only_once():
+def test_user_can_restore_an_admin_issued_wallet_with_the_correct_access_code():
     user, account = make_account_with_identity("claim-user")
     access_code = "claim-code-12345"
     encrypted_wallet = Account.encrypt(account.key, access_code)
@@ -190,12 +190,18 @@ def test_user_claims_an_admin_issued_wallet_only_once():
 
     status_response = client.get("/api/v1/wallet-provision/")
     claimed = client.post("/api/v1/wallet-provision/", {"access_code": access_code}, format="json")
-    replay = client.post("/api/v1/wallet-provision/", {"access_code": access_code}, format="json")
+    provision = WalletProvision.objects.get(user=user)
+    claimed_at = provision.claimed_at
+    restored = client.post("/api/v1/wallet-provision/", {"access_code": access_code}, format="json")
+    rejected = client.post("/api/v1/wallet-provision/", {"access_code": "incorrect-code-123"}, format="json")
 
     assert status_response.status_code == 200
     assert status_response.data == {"issued": True, "claimed": False, "controller_address": account.address}
     assert claimed.status_code == 200
     assert claimed.data["encrypted_wallet"] == encrypted_wallet
-    assert replay.status_code == 409
-    provision = WalletProvision.objects.get(user=user)
-    assert provision.claimed_at <= timezone.now()
+    assert restored.status_code == 200
+    assert restored.data["encrypted_wallet"] == encrypted_wallet
+    assert rejected.status_code == 403
+    provision.refresh_from_db()
+    assert claimed_at <= timezone.now()
+    assert provision.claimed_at == claimed_at

@@ -23,6 +23,8 @@ contract AssetRegistry is ERC721, Pausable {
     event AssetMinted(uint256 indexed tokenId, bytes32 indexed assetIdHash, address indexed owner, bytes32 contentHash, bytes32 metadataHash);
     event AssetTransferred(uint256 indexed tokenId, address indexed from, address indexed to);
     event AssetFrozen(uint256 indexed tokenId, bool frozen);
+    event AssetUnfrozen(uint256 indexed tokenId);
+    event AssetArchived(uint256 indexed tokenId);
 
     modifier onlyRole(bytes32 role) {
         require(accessManager.hasRole(role, msg.sender), "not authorized");
@@ -51,6 +53,14 @@ contract AssetRegistry is ERC721, Pausable {
         require(proofs[tokenId].state != AssetState.REVOKED, "asset revoked");
         proofs[tokenId].state = frozen ? AssetState.FROZEN : AssetState.ACTIVE;
         emit AssetFrozen(tokenId, frozen);
+        if (!frozen) emit AssetUnfrozen(tokenId);
+    }
+
+    function archiveAsset(uint256 tokenId) external whenNotPaused onlyRole(accessManager.EMERGENCY_ADMIN_ROLE()) {
+        require(_ownerOf(tokenId) != address(0), "asset missing");
+        require(proofs[tokenId].state != AssetState.REVOKED, "asset revoked");
+        proofs[tokenId].state = AssetState.ARCHIVED;
+        emit AssetArchived(tokenId);
     }
 
     function governedTransfer(uint256 tokenId, address from, address to)
@@ -70,6 +80,9 @@ contract AssetRegistry is ERC721, Pausable {
         from = _ownerOf(tokenId);
         if (from != address(0)) {
             require(proofs[tokenId].state == AssetState.ACTIVE, "asset not transferable");
+            if (to != address(0)) {
+                require(accessManager.hasRole(accessManager.TRANSFER_AGENT_ROLE(), msg.sender), "governed transfer required");
+            }
         }
         address previous = super._update(to, tokenId, auth);
         if (previous != address(0) && to != address(0)) emit AssetTransferred(tokenId, previous, to);

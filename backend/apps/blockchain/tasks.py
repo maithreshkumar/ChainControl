@@ -53,7 +53,7 @@ def track_pending_transactions():
 
 def _index_known_events(row, receipt):
     _, contract = get_contract(row.contract_name)
-    for event_name in ("AssetMinted", "AssetTransferred", "AssetFrozen", "IdentityRegistered", "IdentityStateChanged", "IdentityKeyRotated"):
+    for event_name in ("AssetMinted", "AssetTransferred", "AssetFrozen", "AssetUnfrozen", "AssetArchived", "IdentityRegistered", "IdentityStateChanged", "IdentityKeyRotated"):
         event_factory = getattr(contract.events, event_name, None)
         if event_factory is None:
             continue

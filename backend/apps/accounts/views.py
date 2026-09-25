@@ -42,17 +42,17 @@ class WalletProvisionView(APIView):
         provision = WalletProvision.objects.select_for_update().filter(user=request.user).first()
         if provision is None:
             raise DomainError("WALLET_NOT_ISSUED", "Django administration has not issued a wallet for this account.", status_code=404)
-        if provision.claimed_at is not None:
-            raise DomainError("WALLET_ALREADY_CLAIMED", "This wallet provision has already been claimed. Ask Django administration to reissue it.", status_code=409)
         if not check_password(serializer.validated_data["access_code"], provision.access_code_digest):
             raise DomainError("WALLET_ACCESS_CODE_INVALID", "The wallet access code is invalid.", status_code=403)
         identity = DecentralizedIdentity.objects.filter(user=request.user).first()
         if identity is None or identity.controller_address.lower() != provision.controller_address.lower():
             raise DomainError("WALLET_PROVISION_STALE", "The issued wallet does not match the account's active DID controller.", status_code=409)
-        provision.claimed_at = timezone.now()
-        provision.save(update_fields=["claimed_at", "updated_at"])
+        is_restore = provision.claimed_at is not None
+        if not is_restore:
+            provision.claimed_at = timezone.now()
+            provision.save(update_fields=["claimed_at", "updated_at"])
         record_audit(
-            action="wallet.provision.claimed",
+            action="wallet.provision.restored" if is_restore else "wallet.provision.claimed",
             object_type="WalletProvision",
             object_id=provision.id,
             actor=request.user,

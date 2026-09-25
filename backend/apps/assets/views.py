@@ -68,6 +68,7 @@ class AssetViewSet(viewsets.ModelViewSet):
             created_by=request.user,
             owner_projection=request.user.identity,
             department=request.user.department,
+            asset_type=Asset.AssetType.DIGITAL_ASSET if serializer.validated_data["kind"] == Asset.Kind.DIGITAL else Asset.AssetType.UNIQUE_PHYSICAL_ASSET,
             state=Asset.State.PROCESSING,
         )
         if asset.kind == Asset.Kind.DIGITAL:
@@ -193,12 +194,15 @@ class TransferViewSet(viewsets.ModelViewSet):
         return TransferRequest.objects.filter(models.Q(sender__user=user) | models.Q(recipient__user=user))
 
     def get_permissions(self):
-        if self.action == "create":
-            self.permission_code = "asset.transfer"
-            self.did_proof_purpose = "ASSET_TRANSFER"
-            return [HasPermissionCode(), RequiresDIDProof()]
-        if self.action == "approve":
-            self.permission_code = "transfer.approve"
+        permission_map = {
+            "create": "asset.transfer",
+            "accept": "asset.transfer",
+            "reject": "asset.transfer",
+            "cancel": "asset.transfer",
+            "approve": "transfer.approve",
+        }
+        if self.action in permission_map:
+            self.permission_code = permission_map[self.action]
             self.did_proof_purpose = "ASSET_TRANSFER"
             return [HasPermissionCode(), RequiresDIDProof()]
         return super().get_permissions()
@@ -210,7 +214,8 @@ class TransferViewSet(viewsets.ModelViewSet):
             raise DomainError("TRANSFER_NOT_ALLOWED", "Only the active projected owner can request this transfer.", status_code=403)
         if serializer.validated_data["recipient"].id == identity.id:
             raise DomainError("TRANSFER_NOT_ALLOWED", "An asset cannot be transferred to the same identity.")
-        serializer.save(sender=identity)
+        transfer = serializer.save(sender=identity)
+        record_audit(action="asset.transfer.requested", object_type="TransferRequest", object_id=transfer.id, actor=self.request.user, correlation_id=getattr(self.request, "correlation_id", None), details={"asset_id": str(asset.id), "recipient_did": transfer.recipient.did})
 
     @action(detail=True, methods=["post"])
     def accept(self, request, pk=None):
@@ -220,6 +225,7 @@ class TransferViewSet(viewsets.ModelViewSet):
         transfer.state = TransferRequest.State.PENDING_APPROVAL
         transfer.recipient_acted_at = timezone.now()
         transfer.save(update_fields=["state", "recipient_acted_at", "updated_at"])
+        record_audit(action="asset.transfer.accepted", object_type="TransferRequest", object_id=transfer.id, actor=request.user, correlation_id=getattr(request, "correlation_id", None))
         return Response(self.get_serializer(transfer).data)
 
     @action(detail=True, methods=["post"])
@@ -230,6 +236,17 @@ class TransferViewSet(viewsets.ModelViewSet):
         transfer.state = TransferRequest.State.REJECTED
         transfer.recipient_acted_at = timezone.now()
         transfer.save(update_fields=["state", "recipient_acted_at", "updated_at"])
+        record_audit(action="asset.transfer.rejected", object_type="TransferRequest", object_id=transfer.id, actor=request.user, correlation_id=getattr(request, "correlation_id", None))
+        return Response(self.get_serializer(transfer).data)
+
+    @action(detail=True, methods=["post"])
+    def cancel(self, request, pk=None):
+        transfer = self.get_object()
+        if transfer.sender.user_id != request.user.id or transfer.state not in {TransferRequest.State.PENDING_RECIPIENT, TransferRequest.State.PENDING_APPROVAL}:
+            raise DomainError("TRANSFER_NOT_ALLOWED", "Only the sender can cancel a transfer before approval.", status_code=403)
+        transfer.state = TransferRequest.State.CANCELLED
+        transfer.save(update_fields=["state", "updated_at"])
+        record_audit(action="asset.transfer.cancelled", object_type="TransferRequest", object_id=transfer.id, actor=request.user, correlation_id=getattr(request, "correlation_id", None))
         return Response(self.get_serializer(transfer).data)
 
     @action(detail=True, methods=["post"])
@@ -245,6 +262,7 @@ class TransferViewSet(viewsets.ModelViewSet):
         transfer.approved_by = request.user
         transfer.approved_at = timezone.now()
         transfer.save(update_fields=["state", "approved_by", "approved_at", "updated_at"])
+        record_audit(action="asset.transfer.approved", object_type="TransferRequest", object_id=transfer.id, actor=request.user, correlation_id=getattr(request, "correlation_id", None), details={"asset_id": str(transfer.asset_id)})
         from .tasks import submit_asset_transfer
         submit_asset_transfer.delay(str(transfer.id), str(getattr(request, "correlation_id", "")))
         return Response(self.get_serializer(transfer).data, status=status.HTTP_202_ACCEPTED)

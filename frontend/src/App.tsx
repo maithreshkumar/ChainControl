@@ -1,17 +1,25 @@
-import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import { Navigate, NavLink, Route, Routes, useNavigate } from "react-router-dom";
-import { Activity, AlertTriangle, Boxes, CheckCircle2, ChevronRight, Eye, EyeOff, Fingerprint, KeyRound, LayoutDashboard, LockKeyhole, LogOut, Network, RefreshCw, Search, ShieldCheck, WalletCards } from "lucide-react";
-import axios from "axios";
+import { Activity, AlertTriangle, Boxes, CheckCircle2, ChevronRight, ClipboardList, Eye, EyeOff, Fingerprint, KeyRound, LayoutDashboard, LockKeyhole, LogOut, Network, PackagePlus, PackageSearch, RefreshCw, Search, ShieldCheck, WalletCards } from "lucide-react";
 import api from "./api";
 import { login, obtainDidProof, useAuth } from "./auth";
 import { useWallet } from "./wallet";
 import { formatIstDateTime } from "./format";
 import type { Asset, Identity as IdentityRecord, NetworkHealth, Paginated, WalletProvisionClaim, WalletProvisionStatus } from "./types";
+import { Empty, Page, Status, errorMessage } from "./ui";
+
+const InventoryPage = lazy(() => import("./InventoryPages").then((module) => ({ default: module.InventoryPage })));
+const InventoryRequestsPage = lazy(() => import("./InventoryPages").then((module) => ({ default: module.InventoryRequestsPage })));
+const TransfersPage = lazy(() => import("./TransfersPage").then((module) => ({ default: module.TransfersPage })));
+const CatalogAdminPage = lazy(() => import("./CatalogAdminPage").then((module) => ({ default: module.CatalogAdminPage })));
 
 const nav: Array<{ to: string; label: string; icon: typeof LayoutDashboard; permission?: string; role?: string }> = [
   { to: "/", label: "Overview", icon: LayoutDashboard },
   { to: "/identity", label: "Identity", icon: Fingerprint },
   { to: "/assets", label: "Assets", icon: Boxes },
+  { to: "/inventory", label: "Inventory", icon: PackageSearch, permission: "inventory.view" },
+  { to: "/inventory/requests", label: "Requests", icon: ClipboardList, permission: "inventory.view" },
+  { to: "/inventory/catalog", label: "Catalog", icon: PackagePlus, permission: "inventory.catalog.manage" },
   { to: "/validator", label: "Validator", icon: CheckCircle2, role: "VALIDATOR" },
   { to: "/wallet", label: "Wallet", icon: WalletCards },
   { to: "/transfers", label: "Transfers", icon: Activity },
@@ -19,11 +27,6 @@ const nav: Array<{ to: string; label: string; icon: typeof LayoutDashboard; perm
   { to: "/security", label: "Security", icon: ShieldCheck, permission: "security.view" },
   { to: "/network", label: "Blockchain", icon: Network, permission: "blockchain.health" },
 ];
-
-function errorMessage(error: unknown) {
-  if (axios.isAxiosError(error)) return error.response?.data?.error?.message ?? error.message;
-  return error instanceof Error ? error.message : "The operation failed.";
-}
 
 function Login() {
   const navigate = useNavigate();
@@ -111,9 +114,15 @@ function Assets() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [showCreate, setShowCreate] = useState(false);
+  const [canRegister, setCanRegister] = useState(user.permissions.includes("asset.mint"));
   const [refreshing, setRefreshing] = useState(false);
   const load = () => api.get<Paginated<Asset>>("/assets/").then((r) => setData(r.data)).catch((e) => setError(errorMessage(e)));
-  useEffect(() => { void load(); }, []);
+  useEffect(() => {
+    void load();
+    api.get<{ permissions: string[] }>("/me/")
+      .then((response) => setCanRegister(response.data.permissions.includes("asset.mint")))
+      .catch(() => undefined);
+  }, []);
   async function refreshBlockchain() {
     setRefreshing(true); setError(""); setNotice("");
     try {
@@ -123,13 +132,13 @@ function Assets() {
       setNotice("Blockchain receipts refreshed. Confirmed submissions remain pending until a validator activates them.");
     } catch (value) { setError(errorMessage(value)); } finally { setRefreshing(false); }
   }
-  const actions = <div className="page-actions"><button className="secondary compact" disabled={refreshing} onClick={() => void refreshBlockchain()}><RefreshCw className={refreshing ? "spinning" : ""} size={15} />{refreshing ? "Refreshing…" : "Refresh blockchain"}</button>{user.permissions.includes("asset.mint") && <button className="primary compact" onClick={() => setShowCreate(!showCreate)}>Register asset</button>}</div>;
+  const actions = <div className="page-actions"><button className="secondary compact" disabled={refreshing} onClick={() => void refreshBlockchain()}><RefreshCw className={refreshing ? "spinning" : ""} size={15} />{refreshing ? "Refreshing…" : "Refresh blockchain"}</button>{canRegister && <button className="primary compact" onClick={() => setShowCreate(!showCreate)}>Register asset</button>}</div>;
   return <Page title="Asset registry" subtitle="Custody, integrity, and ownership are confirmed against the authoritative ledger." action={actions}>
     {showCreate && <AssetForm onDone={() => { setShowCreate(false); load(); }} />}
     {error && <div className="error">{error}</div>}
     {notice && <div className="notice"><CheckCircle2 size={16} />{notice}</div>}
     <section className="panel table-wrap"><table><thead><tr><th>Asset</th><th>Type</th><th>State</th><th>Token</th><th>Owner</th></tr></thead><tbody>
-      {data?.results.map((asset) => <tr key={asset.id}><td><strong>{asset.name}</strong><small>{asset.id}</small></td><td>{asset.kind}</td><td><Status value={asset.state} /></td><td>{asset.token_id ?? "Pending"}</td><td className="mono">{asset.owner_did ? `${asset.owner_did.slice(0, 24)}…` : "Unassigned"}</td></tr>)}
+      {data?.results.map((asset) => <tr key={asset.id}><td><strong>{asset.name}</strong><small>{asset.id}</small></td><td>{asset.asset_type.replaceAll("_", " ")}<small>{asset.token_id ? "NFT-backed unique asset" : asset.kind}</small></td><td><Status value={asset.state} /></td><td>{asset.token_id ?? "Pending"}</td><td className="mono">{asset.owner_did ? `${asset.owner_did.slice(0, 24)}…` : "Unassigned"}</td></tr>)}
     </tbody></table>{data && data.count === 0 && <Empty text="No assets are visible in your current scope." />}</section>
   </Page>;
 }
@@ -212,6 +221,7 @@ function WalletPage() {
   const [identity, setIdentity] = useState<IdentityRecord | null>(null);
   const [provision, setProvision] = useState<WalletProvisionStatus | null>(null);
   const [accessCode, setAccessCode] = useState("");
+  const [showAccessCode, setShowAccessCode] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
@@ -239,14 +249,14 @@ function WalletPage() {
   }
   return <Page title="ChainControl Wallet" subtitle="Controller wallets are issued exclusively by Django administration.">
     <div className="wallet-layout">
-      <section className="panel wallet-card"><div className="wallet-orb"><KeyRound size={30} /></div><div><p className="eyebrow">Organization-issued encrypted vault</p><h3>{wallet.address ?? provision?.controller_address ?? "Awaiting administration"}</h3><p className="muted">{wallet.configured ? wallet.unlocked ? "Unlocked for this session" : "Locked" : provision?.issued ? "Enter the one-time code issued by Django administration." : "Django administration has not issued a controller wallet for this account."}</p></div>{wallet.configured && <Status value={wallet.unlocked ? "UNLOCKED" : "LOCKED"} />}</section>
+      <section className="panel wallet-card"><div className="wallet-orb"><KeyRound size={30} /></div><div><p className="eyebrow">Organization-issued encrypted vault</p><h3>{wallet.address ?? provision?.controller_address ?? "Awaiting administration"}</h3><p className="muted">{wallet.configured ? wallet.unlocked ? "Unlocked for this session" : "Locked" : provision?.issued ? "Enter the wallet access code issued by Django administration." : "Django administration has not issued a controller wallet for this account."}</p></div>{wallet.configured && <Status value={wallet.unlocked ? "UNLOCKED" : "LOCKED"} />}</section>
       {identity && <section className={`panel controller-check ${addressMatches ? "match" : "mismatch"}`}><div>{addressMatches ? <CheckCircle2 /> : <AlertTriangle />}</div><span><strong>{addressMatches ? "Controller verified" : "Controller unavailable"}</strong><small>Identity controller: <span className="mono">{identity.controller_address}</span></small></span></section>}
     </div>
     {error && <div className="error"><AlertTriangle size={16} />{error}</div>}
-    {!wallet.configured && provision?.issued && !provision.claimed && <section className="panel wallet-setup"><div><p className="eyebrow">Administrative provisioning</p><h3>Claim the issued controller wallet</h3><p className="muted">Enter the one-time access code provided by Django administration. Users and validators cannot create, import, or replace controller keys.</p></div><form onSubmit={claim} autoComplete="off"><label>Wallet access code<input type="password" value={accessCode} onChange={(event) => setAccessCode(event.target.value)} autoComplete="new-password" minLength={12} required /></label><button className="primary compact" disabled={busy}>{busy ? "Claiming…" : "Claim admin-issued wallet"}</button></form><p className="wallet-note"><LockKeyhole size={15} />The server returns only an encrypted keystore after validating the one-time code.</p></section>}
+    {!wallet.configured && provision?.issued && !provision.claimed && <section className="panel wallet-setup"><div><p className="eyebrow">Administrative provisioning</p><h3>Claim the issued controller wallet</h3><p className="muted">Enter the wallet access code provided by Django administration. Users and validators cannot create, import, or replace controller keys.</p></div><form onSubmit={claim} autoComplete="off"><label htmlFor="wallet-claim-password">Wallet password / access code<div className="password-input-wrapper"><input id="wallet-claim-password" name="wallet-claim-password" type={showAccessCode ? "text" : "password"} placeholder="Enter your wallet password" value={accessCode} onChange={(event) => setAccessCode(event.target.value)} autoComplete="new-password" minLength={12} required /><button type="button" className="password-toggle-btn" onClick={() => setShowAccessCode((visible) => !visible)} aria-label={showAccessCode ? "Hide wallet password" : "Show wallet password"}>{showAccessCode ? <EyeOff size={16} /> : <Eye size={16} />}</button></div></label><button className="primary compact" disabled={busy}>{busy ? "Claiming…" : "Claim admin-issued wallet"}</button></form><p className="wallet-note"><LockKeyhole size={15} />The server returns only an encrypted keystore after validating the access code.</p></section>}
     {!wallet.configured && provision && !provision.issued && <section className="panel wallet-setup"><div><p className="eyebrow">Administrative action required</p><h3>No controller wallet has been issued</h3><p className="muted">Contact Django administration. This account cannot generate or import its own controller key.</p></div></section>}
-    {!wallet.configured && provision?.claimed && <section className="panel wallet-setup"><div><p className="eyebrow">Reissue required</p><h3>The issued wallet was already claimed</h3><p className="muted">This browser does not have the encrypted wallet. Ask Django administration to reissue a new one-time access code.</p></div></section>}
-    {wallet.configured && !wallet.unlocked && <form className="panel wallet-unlock" onSubmit={unlock} autoComplete="off"><div><p className="eyebrow">Unlock vault</p><h3>Authorize DID signatures</h3><p className="muted">Use the wallet access code supplied by Django administration.</p></div><label>Wallet access code<input type="password" value={accessCode} onChange={(event) => setAccessCode(event.target.value)} autoComplete="current-password" required /></label><button className="primary compact" disabled={busy}>{busy ? "Decrypting…" : "Unlock admin-issued wallet"}</button></form>}
+    {!wallet.configured && provision?.claimed && <section className="panel wallet-setup"><div><p className="eyebrow">Wallet recovery</p><h3>Restore and unlock this wallet</h3><p className="muted">This browser does not have the encrypted wallet. Enter the same wallet access code issued by Django administration to restore its encrypted copy here.</p></div><form onSubmit={claim} autoComplete="off"><label htmlFor="wallet-restore-password">Wallet password / access code<div className="password-input-wrapper"><input id="wallet-restore-password" name="wallet-restore-password" type={showAccessCode ? "text" : "password"} placeholder="Enter your wallet password" value={accessCode} onChange={(event) => setAccessCode(event.target.value)} autoComplete="current-password" minLength={12} autoFocus required /><button type="button" className="password-toggle-btn" onClick={() => setShowAccessCode((visible) => !visible)} aria-label={showAccessCode ? "Hide wallet password" : "Show wallet password"}>{showAccessCode ? <EyeOff size={16} /> : <Eye size={16} />}</button></div></label><button className="primary compact" disabled={busy}>{busy ? "Restoring…" : "Restore & unlock wallet"}</button></form><p className="wallet-note"><LockKeyhole size={15} />Django returns the encrypted keystore only after verifying the access code.</p></section>}
+    {wallet.configured && !wallet.unlocked && <form className="panel wallet-unlock" onSubmit={unlock} autoComplete="off"><div><p className="eyebrow">Unlock vault</p><h3>Enter your wallet password</h3><p className="muted">This is the wallet access code supplied by Django administration, not your ChainControl login password.</p></div><label htmlFor="wallet-unlock-password">Wallet password / access code<div className="password-input-wrapper"><input id="wallet-unlock-password" name="wallet-unlock-password" type={showAccessCode ? "text" : "password"} placeholder="Enter your wallet password" value={accessCode} onChange={(event) => setAccessCode(event.target.value)} autoComplete="current-password" autoFocus required /><button type="button" className="password-toggle-btn" onClick={() => setShowAccessCode((visible) => !visible)} aria-label={showAccessCode ? "Hide wallet password" : "Show wallet password"}>{showAccessCode ? <EyeOff size={16} /> : <Eye size={16} />}</button></div></label><button className="primary compact" disabled={busy}>{busy ? "Decrypting…" : "Unlock wallet"}</button></form>}
     {wallet.configured && wallet.unlocked && <section className="panel wallet-actions"><div><p className="eyebrow">Session controls</p><h3>Wallet is ready to sign</h3><p className="muted">Every sensitive action still creates a one-time, purpose-bound DID challenge.</p></div><button className="secondary compact" onClick={wallet.lock}><LockKeyhole size={15} />Lock now</button></section>}
   </Page>;
 }
@@ -268,14 +278,8 @@ function NetworkPage() {
   return <Page title="Blockchain health" subtitle="Live RPC checks across the four validators maintaining one QBFT ledger."><div className="validator-grid">{health?.validators.map((v) => <article className="panel validator" key={v.validator}><div className={v.healthy ? "node healthy" : "node"}><Network /></div><span>Validator {v.validator}</span><strong>{v.healthy ? "Operational" : "Unavailable"}</strong><small>Block {v.block_height ?? "—"}</small></article>) ?? <Empty text="Checking validator health…" />}</div></Page>;
 }
 
-function Page({ title, subtitle, action, children }: { title: string; subtitle: string; action?: ReactNode; children: ReactNode }) {
-  return <main className="page"><div className="page-title"><div><h1>{title}</h1><p>{subtitle}</p></div>{action}</div>{children}</main>;
-}
-function Status({ value }: { value: string }) { return <span className={`badge ${value.toLowerCase().replaceAll("_", "-")}`}>{value.replaceAll("_", " ")}</span>; }
-function Empty({ text }: { text: string }) { return <div className="empty"><Boxes size={26} /><p>{text}</p></div>; }
-
 export default function App() {
   const user = useAuth((s) => s.user);
   if (!user) return <Login />;
-  return <Shell><Routes><Route path="/" element={<Overview />} /><Route path="/identity" element={<Identity />} /><Route path="/assets" element={<Assets />} /><Route path="/validator" element={<ValidatorRoute />} /><Route path="/wallet" element={<WalletPage />} /><Route path="/transfers" element={<GenericList title="Transfers" subtitle="Recipient acceptance and scoped approval precede ledger execution." endpoint="/transfers/" />} /><Route path="/audit" element={<GenericList title="Audit trail" subtitle="Searchable operational evidence linked to immutable security events." endpoint="/audit/" />} /><Route path="/security" element={<GenericList title="Security alerts" subtitle="Integrity, authorization, and reconciliation findings." endpoint="/security-alerts/" />} /><Route path="/network" element={<NetworkPage />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes></Shell>;
+  return <Shell><Suspense fallback={<Page title="Loading workspace" subtitle="Preparing the requested ChainControl module…"><section className="panel"><Empty text="Loading module…" /></section></Page>}><Routes><Route path="/" element={<Overview />} /><Route path="/identity" element={<Identity />} /><Route path="/assets" element={<Assets />} /><Route path="/inventory" element={<InventoryPage />} /><Route path="/inventory/requests" element={<InventoryRequestsPage />} /><Route path="/inventory/catalog" element={<CatalogAdminPage />} /><Route path="/validator" element={<ValidatorRoute />} /><Route path="/wallet" element={<WalletPage />} /><Route path="/transfers" element={<TransfersPage />} /><Route path="/audit" element={<GenericList title="Audit trail" subtitle="Searchable operational evidence linked to immutable security events." endpoint="/audit/" />} /><Route path="/security" element={<GenericList title="Security alerts" subtitle="Integrity, authorization, and reconciliation findings." endpoint="/security-alerts/" />} /><Route path="/network" element={<NetworkPage />} /><Route path="*" element={<Navigate to="/" replace />} /></Routes></Suspense></Shell>;
 }

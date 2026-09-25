@@ -1,6 +1,6 @@
 # ChainControl
 
-ChainControl is a blockchain-backed identity, access-control, and digital-asset governance platform for SIH26125. It combines Django 6.1, DRF, React/TypeScript, MySQL, Redis/Celery, encrypted MinIO objects, three Solidity contracts, and one four-validator Hyperledger Besu QBFT network.
+ChainControl is a blockchain-backed identity, access-control, inventory, and governed digital-asset platform for SIH26125. It combines Django/DRF, two React/TypeScript applications, MySQL, Redis/Celery, envelope-encrypted MinIO objects, three Solidity contracts, and one four-validator Hyperledger Besu QBFT network.
 
 The repository currently implements and tests the security foundation and its first vertical slices. See [implementation status](docs/IMPLEMENTATION_STATUS.md) for the exact boundary; do not treat unchecked infrastructure or incomplete workflows as production-ready.
 
@@ -10,8 +10,6 @@ The repository currently implements and tests the security foundation and its fi
 - Node.js 22.13+ and npm (only needed for host-side frontend/contract development)
 - Python 3.14 and MySQL build prerequisites (only needed for host-side backend development)
 - A browser wallet capable of `personal_sign` for DID step-up authorization
-
-Docker was not installed on the machine where this repository was initially generated, so the complete Compose topology still requires first-run verification on a Docker-capable host.
 
 ## Environment configuration
 
@@ -101,15 +99,28 @@ docker compose exec backend python manage.py shell -c "from apps.blockchain.task
 ## Start the complete application
 
 ```powershell
-docker compose up -d backend celery-worker celery-beat frontend nginx
+docker compose up -d backend celery-worker celery-beat frontend observer nginx
 docker compose ps
 ```
 
 - Application: `http://localhost/`
+- Read-only Blockchain Observer: `http://localhost:5174/`
 - Django Admin: `http://localhost/admin/`
 - MinIO Console: `http://localhost:9001/`
 - Besu JSON-RPC: `http://localhost:8545/`
 - Internal explorer APIs: `http://localhost/api/v1/blockchain/transactions/` and `/events/`
+
+The main application contains inventory and request workspaces. Admins maintain catalogue, variants, locations, and stock through Django Admin; employees request available items; managers/admins reserve, approve, issue, reject, and return requests according to platform permissions. The Observer is a separate read-only deployment and exposes no blockchain mutation controls.
+
+## Authorized asset recovery
+
+An authorized administrator can decrypt one digital asset to an explicit path. Run inside the backend container so it can reach MySQL and MinIO:
+
+```powershell
+docker compose exec backend python manage.py decrypt_asset ASSET_UUID --actor admin --reason "Approved incident review" --output /tmp/authorized-output.bin
+```
+
+Add `--asset-version N` for a historical version or `--cleanup` for an explicitly ephemeral recovery. The command authenticates AES-GCM, verifies SHA-256, writes mode `0600` where supported, and records `ADMIN_DECRYPT`. The UUID identifies the record; it never derives a key.
 
 ## Host-side development
 
@@ -150,6 +161,8 @@ npm test
 cd ..\frontend
 npm run build
 npm test
+cd ..\observer
+npm run build
 ```
 
 ## Stop and clean development services
@@ -171,4 +184,3 @@ This volume-removal command is destructive and cannot recover prior local chain 
 ## Documentation
 
 Start with [architecture](docs/ARCHITECTURE.md), [security design](docs/SECURITY.md), [threat model](docs/THREAT_MODEL.md), [API](docs/API.md), and the [demo walkthrough](WALKTHROUGH.md).
-

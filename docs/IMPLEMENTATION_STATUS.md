@@ -1,19 +1,21 @@
 # Implementation Status
 
-| Area | Status | Evidence / blocker |
-|---|---|---|
-| Repository architecture and security docs | IMPLEMENTED | Files under `docs/` |
-| Docker service topology | IMPLEMENTED | `docker-compose.yml`; runtime unverified because Docker is absent locally |
-| Django/DRF foundation | IMPLEMENTED | Django check, migrations, and 6 backend tests pass with isolated SQLite settings; MySQL integration requires Docker |
-| Controlled invitation/bootstrap | IMPLEMENTED | One-time invitations, activation, first platform-Admin command; full API integration test pending |
-| Permission-level RBAC | TESTED | Scoped permission and superuser-separation tests pass |
-| Besu 4-validator QBFT configuration | IMPLEMENTED | Official QBFT genesis pattern and generated validator topology; runtime requires Docker |
-| Smart contracts | TESTED | Hardhat 3 compile plus 4 authorization/lifecycle tests pass; npm audit reports 0 vulnerabilities |
-| DID challenge-response | TESTED | Valid signing, replay rejection, and revoked-identity rejection pass |
-| Encrypted MinIO asset flow | IMPLEMENTED | AES-GCM/SHA-256 round-trip and tamper test passes; live MinIO integration requires Docker |
-| Blockchain transaction/indexer/reconciliation | IN PROGRESS | Central signer/nonce service, receipt indexing, and owner reconciliation implemented; independent block-range indexer and live Besu test remain |
-| Transfer workflow | IN PROGRESS | Request/accept/reject/approval/backend execution and contract enforcement implemented; frontend actions and full integration test remain |
-| React role-aware UI | TESTED | Production build and 2 navigation/authentication surface tests pass |
-| Complete E2E scenario | NOT STARTED | — |
+Status reflects executed evidence on 15 September 2026 IST. `TESTED` is used only where the named automated or live command passed.
 
-Local prerequisite audit on 2026-08-29: Python 3.14.3 and Node 26.7.0 are present; Docker is not installed; the default npm shim points to a missing roaming installation (the system npm CLI path works).
+| Area | Status | Evidence / remaining boundary |
+|---|---|---|
+| Repository audit and upgrade plan | TESTED | `UPGRADE_ANALYSIS.md`; migrations and Django checks executed |
+| Enterprise inventory model and APIs | TESTED | Atomic movement/request tests including oversell, scope, catalogue, issue and return |
+| Main inventory and request UI | TESTED | Main React production build and existing Vitest suite pass |
+| Asset-type separation/migration | TESTED | Migration check and backend regression suite pass |
+| ERC-721 governance hardening | TESTED | Hardhat tests prove mint authorization, direct-transfer rejection, governed transfer, freeze/archive restrictions |
+| NFT backend/UI projection | TESTED | Updated contracts deployed at live block 7496; active ABI includes archive/unfreeze governance and the projection tests pass |
+| Four-validator Besu QBFT topology | TESTED | All four independent validator containers are healthy and the live health API reports consensus with synchronized heights |
+| Observer backend | TESTED | Permission, pagination, read-only method, decoded transaction tests, and live QBFT block reads pass |
+| Separate Observer React app | TESTED | Production TypeScript/Vite build passes; live app and its authenticated API return successfully on port 5174 |
+| Live validator/network visualization | TESTED | Live health response contains four validators, real QBFT heights, and `consensus_healthy=true` |
+| Encrypted MinIO storage | TESTED | Existing AES-256-GCM round-trip, SHA-256, and tamper rejection test passes |
+| Administrative decryption utility | TESTED | Valid output, invalid UUID, authenticated failure, audit, no-key logging, and explicit cleanup tests pass |
+| Docker Compose live smoke test | TESTED | All 13 long-running services are up; main app, admin, observer, MinIO, auth, inventory, RPC, migrations, and live observer reads passed |
+
+Final verification: backend `43 passed`; frontend `10 passed`; contracts `5 passed`; both production frontends build; Django reports no configuration or migration drift; `git diff --check` is clean.
