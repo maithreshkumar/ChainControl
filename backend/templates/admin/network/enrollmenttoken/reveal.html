@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:index' %}">Home</a>
+  &rsaquo; <a href="{{ changelist_url }}">Enrollment tokens</a>
+  &rsaquo; Code created
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="cc-token-reveal">
+  <p class="cc-kicker">Node enrollment</p>
+  <h1>Copy this code now</h1>
+  <p>This code admits one new node to the same ChainControl blockchain. It is stored only as a salted hash and cannot be displayed again.</p>
+
+  <label for="enrollment-code">One-time enrollment code</label>
+  <div class="cc-token-reveal__copy-row">
+    <input id="enrollment-code" type="text" value="{{ enrollment_code }}" readonly spellcheck="false" autocomplete="off">
+    <button type="button" class="button" id="copy-enrollment-code">Copy code</button>
+  </div>
+  <p class="help">Label: {{ token.label }} · Expires: {{ token.expires_at }}</p>
+
+  <div class="cc-token-reveal__actions">
+    <a class="button" href="{{ changelist_url }}">Done</a>
+    <a href="{{ add_url }}">Create another code</a>
+  </div>
+</div>
+
+<script>
+  document.getElementById("copy-enrollment-code").addEventListener("click", async function () {
+    const field = document.getElementById("enrollment-code");
+    try {
+      await navigator.clipboard.writeText(field.value);
+      this.textContent = "Copied";
+    } catch (error) {
+      field.select();
+      document.execCommand("copy");
+      this.textContent = "Copied";
+    }
+  });
+</script>
+{% endblock %}

@@ -48,6 +48,8 @@ services:
     image: hyperledger/besu:25.7.0
     user: root
     env_file: .env
+    environment:
+      INITIAL_VALIDATOR_COUNT: ${INITIAL_VALIDATOR_COUNT:-4}
     entrypoint: ["/bin/bash", "/network/bootstrap.sh"]
     volumes:
       - ./infrastructure/besu:/network
@@ -67,7 +69,9 @@ services:
       default:
         ipv4_address: 172.20.0.11
     ports:
-      - "8545:8545"
+      - "127.0.0.1:8545:8545"
+      - "${P2P_BIND_IP:-0.0.0.0}:30303:30303/tcp"
+      - "${P2P_BIND_IP:-0.0.0.0}:30303:30303/udp"
     healthcheck:
       test: ["CMD-SHELL", "bash -c 'echo >/dev/tcp/127.0.0.1/8545'"]
       interval: 10s
@@ -84,7 +88,9 @@ services:
     networks:
       default:
         ipv4_address: 172.20.0.12
-    ports: []
+    ports:
+      - "${P2P_BIND_IP:-0.0.0.0}:30304:30303/tcp"
+      - "${P2P_BIND_IP:-0.0.0.0}:30304:30303/udp"
 
   besu-validator-3:
     <<: *besu-validator
@@ -96,7 +102,9 @@ services:
     networks:
       default:
         ipv4_address: 172.20.0.13
-    ports: []
+    ports:
+      - "${P2P_BIND_IP:-0.0.0.0}:30305:30303/tcp"
+      - "${P2P_BIND_IP:-0.0.0.0}:30305:30303/udp"
 
   besu-validator-4:
     <<: *besu-validator
@@ -108,7 +116,9 @@ services:
     networks:
       default:
         ipv4_address: 172.20.0.14
-    ports: []
+    ports:
+      - "${P2P_BIND_IP:-0.0.0.0}:30306:30303/tcp"
+      - "${P2P_BIND_IP:-0.0.0.0}:30306:30303/udp"
 
   backend:
     build: ./backend
@@ -127,6 +137,7 @@ services:
       - ./backend:/app
       - ./blockchain/deployments:/deployments:ro
       - ./backend/staticfiles:/app/staticfiles
+      - besu-config:/besu-config
 
   celery-worker:
     build: ./backend
@@ -136,6 +147,7 @@ services:
     command: ["celery", "-A", "config", "worker", "-l", "INFO", "--concurrency=1"]
     volumes:
       - ./backend:/app
+      - besu-config:/besu-config
 
   celery-beat:
     build: ./backend
@@ -145,6 +157,7 @@ services:
     command: ["celery", "-A", "config", "beat", "-l", "INFO"]
     volumes:
       - ./backend:/app
+      - besu-config:/besu-config
 
   contract-deployer:
     image: node:24-alpine
@@ -167,13 +180,33 @@ services:
       - backend
 
   observer:
-    build: ./observer
+    build:
+      context: ./observer
+      args:
+        VITE_LOCAL_RPC_URL: /rpc/
     environment:
       VITE_API_URL: /api/v1
+      VITE_LOCAL_RPC_URL: /rpc/
     depends_on:
       - backend
+      - observer-rpc-proxy
     ports:
-      - "5174:80"
+      - "127.0.0.1:5174:80"
+    volumes:
+      - ./blockchain/deployments/1337.json:/usr/share/nginx/html/deployments/1337.json:ro
+
+  observer-rpc-proxy:
+    build: ./node-package/agent
+    restart: unless-stopped
+    depends_on:
+      besu-validator-1:
+        condition: service_healthy
+    entrypoint: ["python", "/agent/rpc_proxy.py"]
+    environment:
+      BESU_RPC_URL: http://besu-validator-1:8545
+      RPC_PROXY_PORT: 8080
+      METADATA_API_URL: http://backend:8000
+      METADATA_HOST_HEADER: localhost
 
   nginx:
     image: nginx:1.27-alpine

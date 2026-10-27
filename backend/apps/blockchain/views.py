@@ -1,5 +1,3 @@
-import os
-
 from django.conf import settings
 from django.db import models
 from rest_framework import generics
@@ -38,10 +36,7 @@ class BlockchainHealthView(APIView):
     permission_code = "blockchain.health"
 
     def get(self, request):
-        urls = os.getenv(
-            "BESU_RPC_URLS",
-            "http://besu-validator-1:8545,http://besu-validator-2:8545,http://besu-validator-3:8545,http://besu-validator-4:8545",
-        ).split(",")
+        urls = settings.BESU_MANAGED_RPC_URLS
         validators = []
         for index, url in enumerate(urls, 1):
             try:
@@ -50,8 +45,25 @@ class BlockchainHealthView(APIView):
                 validators.append({"validator": index, "rpc": url, "healthy": False, "block_height": None, "peer_count": None, "validator_count": None, "validator_addresses": []})
         heights = [row["block_height"] for row in validators if row["block_height"] is not None]
         healthy = all(row["healthy"] for row in validators)
-        consensus_healthy = healthy and bool(heights) and max(heights) - min(heights) <= 1 and all(row["validator_count"] == 4 for row in validators)
-        return Response({"chain_id": settings.CHAIN_ID, "healthy": healthy, "consensus_healthy": consensus_healthy, "latest_block": max(heights) if heights else None, "validators": validators})
+        reported_sets = [tuple(sorted(address.lower() for address in row["validator_addresses"])) for row in validators if row["healthy"]]
+        validator_set = list(reported_sets[0]) if reported_sets else []
+        consensus_healthy = (
+            healthy
+            and bool(heights)
+            and bool(validator_set)
+            and max(heights) - min(heights) <= 1
+            and all(reported == reported_sets[0] for reported in reported_sets)
+        )
+        return Response({
+            "chain_id": settings.CHAIN_ID,
+            "healthy": healthy,
+            "consensus_healthy": consensus_healthy,
+            "latest_block": max(heights) if heights else None,
+            "validator_count": len(validator_set),
+            "validator_addresses": validator_set,
+            "nodes": validators,
+            "validators": validators,
+        })
 
 
 class ObserverBlockListView(APIView):

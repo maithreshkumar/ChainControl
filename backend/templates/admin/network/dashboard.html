@@ -1,0 +1,40 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<div id="content-main">
+  <div class="module aligned">
+    <h2>ChainControl Network</h2>
+    <div class="form-row"><strong>Total nodes:</strong> {{ total_nodes }}</div>
+    <div class="form-row"><strong>Online:</strong> {{ online_nodes }} · <strong>Offline:</strong> {{ offline_nodes }} · <strong>Pending:</strong> {{ pending_nodes }}</div>
+    <div class="form-row"><strong>Full nodes:</strong> {{ full_nodes }} · <strong>Actual QBFT validators:</strong> {{ validator_nodes }}</div>
+    <div class="form-row"><strong>Network block:</strong> {{ latest_block|default:"Unavailable" }} · <strong>Consensus API:</strong> {{ consensus }}</div>
+  </div>
+  <div class="module">
+    <h2>Dynamic nodes</h2>
+    <table>
+      <thead><tr><th>Node</th><th>Owner</th><th>Role</th><th>Status</th><th>Block</th><th>Sync</th><th>Peers</th><th>Last seen</th></tr></thead>
+      <tbody>
+      {% for node in nodes %}
+        <tr>
+          <th><a href="{% url 'admin:network_blockchainnode_change' node.pk %}">{{ node.node_name }}</a><br><small>{{ node.node_uuid }}</small></th>
+          <td>{{ node.owner|default:"Technical node" }}</td><td>{{ node.get_node_type_display }}</td><td>{{ node.get_status_display }}</td>
+          <td>{{ node.latest_block|default:"—" }}</td><td>{{ node.sync_percentage|default:"—" }}%</td><td>{{ node.peer_count|default:"—" }}</td><td>{{ node.last_seen|default:"Never" }}</td>
+        </tr>
+      {% empty %}<tr><td colspan="8">No nodes are registered yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="module">
+    <h2>Observed peer topology</h2>
+    <p>Only links reported by authenticated node heartbeats are shown; no connection is inferred.</p>
+    <table>
+      <thead><tr><th>Reporting node</th><th>Observed peer</th><th>Observed at</th></tr></thead>
+      <tbody>
+      {% for edge in topology_edges %}
+        <tr><td>{{ edge.source.node_name }}</td><td>{{ edge.target.node_name }}</td><td>{{ edge.observed_at }}</td></tr>
+      {% empty %}<tr><td colspan="3">No authenticated peer relationships have been reported yet.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p><a class="button" href="{% url 'admin:network_blockchainnode_changelist' %}">Manage node approvals</a> <a class="button" href="{% url 'admin:network_enrollmenttoken_add' %}">Create enrollment code</a></p>
+</div>
+{% endblock %}

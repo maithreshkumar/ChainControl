@@ -5,6 +5,6 @@ export type { AssetRegistry } from './AssetRegistry.js';
 export type { IdentityRegistry } from './IdentityRegistry.js';
 export type { TrustAccessManager } from './TrustAccessManager.js';
 export * as factories from './factories/index.js';
+export { TrustAccessManager__factory } from './factories/TrustAccessManager__factory.js';
 export { AssetRegistry__factory } from './factories/AssetRegistry__factory.js';
 export { IdentityRegistry__factory } from './factories/IdentityRegistry__factory.js';
-export { TrustAccessManager__factory } from './factories/TrustAccessManager__factory.js';

@@ -1,6 +1,6 @@
 # ChainControl
 
-ChainControl is a blockchain-backed identity, access-control, inventory, and governed digital-asset platform for SIH26125. It combines Django/DRF, two React/TypeScript applications, MySQL, Redis/Celery, envelope-encrypted MinIO objects, three Solidity contracts, and one four-validator Hyperledger Besu QBFT network.
+ChainControl is a blockchain-backed identity, access-control, inventory, and governed digital-asset platform for SIH26125. It combines Django/DRF, two React/TypeScript applications, MySQL, Redis/Celery, envelope-encrypted MinIO objects, three Solidity contracts, and a dynamically admitted Hyperledger Besu QBFT network. Four same-host validators remain the initial development set; node and validator counts are no longer application constants.
 
 The repository currently implements and tests the security foundation and its first vertical slices. See [implementation status](docs/IMPLEMENTATION_STATUS.md) for the exact boundary; do not treat unchecked infrastructure or incomplete workflows as production-ready.
 
@@ -44,6 +44,16 @@ Verify block production:
 ```powershell
 Invoke-RestMethod -Uri http://localhost:8545 -Method Post -ContentType application/json -Body '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'
 ```
+
+Register the exact existing chain identity before approving any remote node:
+
+```powershell
+docker compose exec backend python manage.py migrate
+docker compose exec backend python manage.py capture_network_genesis
+docker compose exec backend python manage.py register_bootstrap_nodes
+```
+
+Do not regenerate genesis or delete the Besu volumes. Open `/admin/network/` as Django superuser to create a single-use join code, review enrollment, and govern validator changes. Build the Windows distribution with `powershell -ExecutionPolicy Bypass -File .\node-package\build-package.ps1`. See [Node Enrollment](NODE_ENROLLMENT.md), [Remote Setup](REMOTE_NODE_SETUP.md), and [Network Security](NETWORK_SECURITY.md).
 
 ## Compile, test, and deploy contracts
 

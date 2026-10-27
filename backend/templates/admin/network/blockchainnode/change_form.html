@@ -1,0 +1,18 @@
+{% extends "admin/change_form.html" %}
+
+{% block submit_buttons_bottom %}
+  {% if original and original.status == "PENDING" %}
+    <div class="submit-row cc-node-decision">
+      <div>
+        <strong>Approve this node?</strong>
+        <span>Yes adds its enode to the verified Besu permission allowlist. No rejects the enrollment request.</span>
+      </div>
+      <div class="cc-node-decision__buttons">
+        <button type="submit" name="_approve_node" value="yes" class="default">Yes — approve node</button>
+        <button type="submit" name="_reject_node" value="no" class="cc-reject-button">No — reject node</button>
+      </div>
+    </div>
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}

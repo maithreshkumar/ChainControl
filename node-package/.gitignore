@@ -1,0 +1,10 @@
+.env
+.node/
+config/genesis.json
+config/node-address
+config/node-public-key
+config/node-config.json
+config/permissions_config.toml
+dist/
+__pycache__/
+*.pyc

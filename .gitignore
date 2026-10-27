@@ -12,6 +12,11 @@ frontend/dist/
 frontend/*.tsbuildinfo
 observer/node_modules/
 observer/dist/
+backend/celerybeat-schedule-shm
+backend/celerybeat-schedule-wal
+backend/celerybeat-schedule
+backend/decrypted-chaincontrol-e2e-asset.txt
+e2e-chaincontrol-asset.txt
 observer/*.tsbuildinfo
 blockchain/node_modules/
 blockchain/artifacts/

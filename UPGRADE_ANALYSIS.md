@@ -6,7 +6,7 @@ Audit date: 14 September 2026 (IST)
 
 This document records the repository state before the enterprise inventory, governed NFT, observer, analytics, and administrative-decryption upgrade. It distinguishes functionality that is already implemented from functionality that is missing or only partially implemented so that subsequent phases extend the application without replacing working security controls.
 
-The repository contains one business React application, one Django REST backend, MySQL operational storage, Redis/Celery coordination, encrypted MinIO object storage, and one four-validator Hyperledger Besu QBFT network. It is a multi-validator permissioned blockchain simulation on one physical development machine; it is not physically decentralized.
+At the time of this original audit, the repository contained one business React application, one Django REST backend, MySQL operational storage, Redis/Celery coordination, encrypted MinIO object storage, and one four-validator Hyperledger Besu QBFT network. That was a multi-validator permissioned blockchain simulation on one physical development machine. The later decentralization upgrade preserves those four as the initial set while adding dynamic enrollment and governed membership; see `DECENTRALIZATION_UPGRADE_PLAN.md` for current status.
 
 ## 2. Current architecture
 

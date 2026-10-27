@@ -36,7 +36,7 @@ export type Identity = {
 export type Paginated<T> = { count: number; next: string | null; previous: string | null; results: T[] };
 
 export type Validator = { validator: number; rpc: string; healthy: boolean; block_height: number | null };
-export type NetworkHealth = { chain_id: number; healthy: boolean; validators: Validator[] };
+export type NetworkHealth = { chain_id: number; healthy: boolean; consensus_healthy?: boolean; latest_block?: number | null; validator_count?: number; validator_addresses?: string[]; validators: Validator[] };
 
 export type WalletProvisionStatus = {
   issued: boolean;

@@ -10,6 +10,15 @@ Follow `README.md` through environment setup, validator startup, contract deploy
 
 Open the business app at `http://localhost/` and the independent read-only Observer at `http://localhost:5174/`. Sign in to Observer using an Admin, Validator, Manager, or Auditor account whose seeded role includes `observer.view`.
 
+## Demonstrate independent node synchronization
+
+1. As Django superuser, open `/admin/network/`, create an expiring enrollment code, and give it with the private ChainControl URL to the remote operator.
+2. On a second overlay-connected Windows computer, run the generated package's `scripts\setup.bat`. Confirm the PENDING node and that no private key appears in Django.
+3. Approve it in Network Administration. Start the package and open its `http://localhost:5174`.
+4. Compare the local head/hash with the main node. Create a normal ChainControl transaction and watch the new block arrive without copying data files.
+5. Stop the remote package, allow the network to advance, restart it, and watch real sync progress reach the current head.
+6. Disconnect Django temporarily: existing Besu synchronization and local raw block viewing must continue. Do not claim geographic decentralization until this is executed on a physically separate host.
+
 ## Catalogue and request inventory
 
 1. In Django Admin, create a category, optional subcategory, catalogue item, SKU variant, location, and stock record.
@@ -62,7 +71,7 @@ Call `/assets/{id}/verify/` as an authorized user. ChainControl retrieves and au
 
 ## Audit and health
 
-Open Observer to inspect incrementally loaded blocks, full transactions, decoded calls/events, NFT owner projections, analytics, search, and live four-validator status. It polls real endpoints every five seconds and contains no fake activity.
+Open Observer to inspect incrementally loaded blocks, full transactions, decoded calls/events, NFT owner projections, analytics, search, and the live dynamically discovered validator set. It polls real endpoints every five seconds and contains no fake activity.
 
 ## Authorized decryption demonstration
 

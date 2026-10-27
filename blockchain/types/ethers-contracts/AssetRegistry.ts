@@ -3,13 +3,13 @@
 /* eslint-disable */
 import type { BaseContract, BigNumberish, BytesLike, FunctionFragment, Result, Interface, EventFragment, AddressLike, ContractRunner, ContractMethod, Listener } from "ethers"
 import type { TypedContractEvent, TypedDeferredTopicFilter, TypedEventLog, TypedLogDescription, TypedListener, TypedContractMethod } from "./common.js"
-
+  
 export declare namespace AssetRegistry {
-
+      
     export type AssetProofStruct = {assetIdHash: BytesLike, contentHash: BytesLike, metadataHash: BytesLike, state: BigNumberish}
 
     export type AssetProofStructOutput = [assetIdHash: string, contentHash: string, metadataHash: string, state: bigint] & {assetIdHash: string, contentHash: string, metadataHash: string, state: bigint }
-
+  
     }
 
   export interface AssetRegistryInterface extends Interface {
@@ -66,7 +66,7 @@ decodeFunctionResult(functionFragment: 'transferFrom', data: BytesLike): Result;
 decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
   }
 
-
+  
     export namespace ApprovalEvent {
       export type InputTuple = [owner: AddressLike, approved: AddressLike, tokenId: BigNumberish];
       export type OutputTuple = [owner: string, approved: string, tokenId: bigint];
@@ -77,7 +77,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
     export namespace ApprovalForAllEvent {
       export type InputTuple = [owner: AddressLike, operator: AddressLike, approved: boolean];
@@ -89,7 +89,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
     export namespace AssetArchivedEvent {
       export type InputTuple = [tokenId: BigNumberish];
@@ -101,7 +101,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
     export namespace AssetFrozenEvent {
       export type InputTuple = [tokenId: BigNumberish, frozen: boolean];
@@ -113,7 +113,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
     export namespace AssetMintedEvent {
       export type InputTuple = [tokenId: BigNumberish, assetIdHash: BytesLike, owner: AddressLike, contentHash: BytesLike, metadataHash: BytesLike];
@@ -125,7 +125,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
     export namespace AssetTransferredEvent {
       export type InputTuple = [tokenId: BigNumberish, from: AddressLike, to: AddressLike];
@@ -137,7 +137,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
     export namespace AssetUnfrozenEvent {
       export type InputTuple = [tokenId: BigNumberish];
@@ -149,7 +149,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
     export namespace PausedEvent {
       export type InputTuple = [account: AddressLike];
@@ -161,7 +161,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
     export namespace TransferEvent {
       export type InputTuple = [from: AddressLike, to: AddressLike, tokenId: BigNumberish];
@@ -173,7 +173,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
     export namespace UnpausedEvent {
       export type InputTuple = [account: AddressLike];
@@ -185,16 +185,16 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
       export type LogDescription = TypedLogDescription<Event>
     }
 
-
+  
 
   export interface AssetRegistry extends BaseContract {
-
+    
     connect(runner?: ContractRunner | null): AssetRegistry;
     waitForDeployment(): Promise<this>;
 
     interface: AssetRegistryInterface;
 
-
+    
   queryFilter<TCEvent extends TypedContractEvent>(
     event: TCEvent,
     fromBlockOrBlockhash?: string | number | undefined,
@@ -208,7 +208,7 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
 
   on<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   on<TCEvent extends TypedContractEvent>(filter: TypedDeferredTopicFilter<TCEvent>, listener: TypedListener<TCEvent>): Promise<this>
-
+  
   once<TCEvent extends TypedContractEvent>(event: TCEvent, listener: TypedListener<TCEvent>): Promise<this>
   once<TCEvent extends TypedContractEvent>(filter: TypedDeferredTopicFilter<TCEvent>, listener: TypedListener<TCEvent>): Promise<this>
 
@@ -219,190 +219,190 @@ decodeFunctionResult(functionFragment: 'unpause', data: BytesLike): Result;
   removeAllListeners<TCEvent extends TypedContractEvent>(event?: TCEvent): Promise<this>
 
 
-
-
+    
+    
     accessManager: TypedContractMethod<
       [],
       [string],
       'view'
     >
+    
 
-
-
+    
     approve: TypedContractMethod<
       [to: AddressLike, tokenId: BigNumberish, ],
       [void],
       'nonpayable'
     >
+    
 
-
-
+    
     archiveAsset: TypedContractMethod<
       [tokenId: BigNumberish, ],
       [void],
       'nonpayable'
     >
+    
 
-
-
+    
     balanceOf: TypedContractMethod<
       [owner: AddressLike, ],
       [bigint],
       'view'
     >
+    
 
-
-
+    
     getApproved: TypedContractMethod<
       [tokenId: BigNumberish, ],
       [string],
       'view'
     >
+    
 
-
-
+    
     getAssetProof: TypedContractMethod<
       [tokenId: BigNumberish, ],
       [AssetRegistry.AssetProofStructOutput],
       'view'
     >
+    
 
-
-
+    
     governedTransfer: TypedContractMethod<
       [tokenId: BigNumberish, from: AddressLike, to: AddressLike, ],
       [void],
       'nonpayable'
     >
+    
 
-
-
+    
     isApprovedForAll: TypedContractMethod<
       [owner: AddressLike, operator: AddressLike, ],
       [boolean],
       'view'
     >
+    
 
-
-
+    
     mintAsset: TypedContractMethod<
       [owner: AddressLike, assetIdHash: BytesLike, contentHash: BytesLike, metadataHash: BytesLike, ],
       [bigint],
       'nonpayable'
     >
+    
 
-
-
+    
     name: TypedContractMethod<
       [],
       [string],
       'view'
     >
+    
 
-
-
+    
     ownerOf: TypedContractMethod<
       [tokenId: BigNumberish, ],
       [string],
       'view'
     >
+    
 
-
-
+    
     pause: TypedContractMethod<
       [],
       [void],
       'nonpayable'
     >
+    
 
-
-
+    
     paused: TypedContractMethod<
       [],
       [boolean],
       'view'
     >
+    
 
-
-
+    
     "safeTransferFrom(address,address,uint256)": TypedContractMethod<
       [from: AddressLike, to: AddressLike, tokenId: BigNumberish, ],
       [void],
       'nonpayable'
     >
+    
 
-
-
+    
     "safeTransferFrom(address,address,uint256,bytes)": TypedContractMethod<
       [from: AddressLike, to: AddressLike, tokenId: BigNumberish, data: BytesLike, ],
       [void],
       'nonpayable'
     >
+    
 
-
-
+    
     setApprovalForAll: TypedContractMethod<
       [operator: AddressLike, approved: boolean, ],
       [void],
       'nonpayable'
     >
+    
 
-
-
+    
     setFrozen: TypedContractMethod<
       [tokenId: BigNumberish, frozen: boolean, ],
       [void],
       'nonpayable'
     >
+    
 
-
-
+    
     supportsInterface: TypedContractMethod<
       [interfaceId: BytesLike, ],
       [boolean],
       'view'
     >
+    
 
-
-
+    
     symbol: TypedContractMethod<
       [],
       [string],
       'view'
     >
+    
 
-
-
+    
     tokenByAssetIdHash: TypedContractMethod<
       [arg0: BytesLike, ],
       [bigint],
       'view'
     >
+    
 
-
-
+    
     tokenURI: TypedContractMethod<
       [tokenId: BigNumberish, ],
       [string],
       'view'
     >
+    
 
-
-
+    
     transferFrom: TypedContractMethod<
       [from: AddressLike, to: AddressLike, tokenId: BigNumberish, ],
       [void],
       'nonpayable'
     >
+    
 
-
-
+    
     unpause: TypedContractMethod<
       [],
       [void],
       'nonpayable'
     >
-
+    
 
 
     getFunction<T extends ContractMethod = ContractMethod>(key: string | FunctionFragment): T;
@@ -535,45 +535,45 @@ getEvent(key: 'Transfer'): TypedContractEvent<TransferEvent.InputTuple, Transfer
 getEvent(key: 'Unpaused'): TypedContractEvent<UnpausedEvent.InputTuple, UnpausedEvent.OutputTuple, UnpausedEvent.OutputObject>;
 
     filters: {
-
+      
       'Approval(address,address,uint256)': TypedContractEvent<ApprovalEvent.InputTuple, ApprovalEvent.OutputTuple, ApprovalEvent.OutputObject>;
       Approval: TypedContractEvent<ApprovalEvent.InputTuple, ApprovalEvent.OutputTuple, ApprovalEvent.OutputObject>;
-
+    
 
       'ApprovalForAll(address,address,bool)': TypedContractEvent<ApprovalForAllEvent.InputTuple, ApprovalForAllEvent.OutputTuple, ApprovalForAllEvent.OutputObject>;
       ApprovalForAll: TypedContractEvent<ApprovalForAllEvent.InputTuple, ApprovalForAllEvent.OutputTuple, ApprovalForAllEvent.OutputObject>;
-
+    
 
       'AssetArchived(uint256)': TypedContractEvent<AssetArchivedEvent.InputTuple, AssetArchivedEvent.OutputTuple, AssetArchivedEvent.OutputObject>;
       AssetArchived: TypedContractEvent<AssetArchivedEvent.InputTuple, AssetArchivedEvent.OutputTuple, AssetArchivedEvent.OutputObject>;
-
+    
 
       'AssetFrozen(uint256,bool)': TypedContractEvent<AssetFrozenEvent.InputTuple, AssetFrozenEvent.OutputTuple, AssetFrozenEvent.OutputObject>;
       AssetFrozen: TypedContractEvent<AssetFrozenEvent.InputTuple, AssetFrozenEvent.OutputTuple, AssetFrozenEvent.OutputObject>;
-
+    
 
       'AssetMinted(uint256,bytes32,address,bytes32,bytes32)': TypedContractEvent<AssetMintedEvent.InputTuple, AssetMintedEvent.OutputTuple, AssetMintedEvent.OutputObject>;
       AssetMinted: TypedContractEvent<AssetMintedEvent.InputTuple, AssetMintedEvent.OutputTuple, AssetMintedEvent.OutputObject>;
-
+    
 
       'AssetTransferred(uint256,address,address)': TypedContractEvent<AssetTransferredEvent.InputTuple, AssetTransferredEvent.OutputTuple, AssetTransferredEvent.OutputObject>;
       AssetTransferred: TypedContractEvent<AssetTransferredEvent.InputTuple, AssetTransferredEvent.OutputTuple, AssetTransferredEvent.OutputObject>;
-
+    
 
       'AssetUnfrozen(uint256)': TypedContractEvent<AssetUnfrozenEvent.InputTuple, AssetUnfrozenEvent.OutputTuple, AssetUnfrozenEvent.OutputObject>;
       AssetUnfrozen: TypedContractEvent<AssetUnfrozenEvent.InputTuple, AssetUnfrozenEvent.OutputTuple, AssetUnfrozenEvent.OutputObject>;
-
+    
 
       'Paused(address)': TypedContractEvent<PausedEvent.InputTuple, PausedEvent.OutputTuple, PausedEvent.OutputObject>;
       Paused: TypedContractEvent<PausedEvent.InputTuple, PausedEvent.OutputTuple, PausedEvent.OutputObject>;
-
+    
 
       'Transfer(address,address,uint256)': TypedContractEvent<TransferEvent.InputTuple, TransferEvent.OutputTuple, TransferEvent.OutputObject>;
       Transfer: TypedContractEvent<TransferEvent.InputTuple, TransferEvent.OutputTuple, TransferEvent.OutputObject>;
-
+    
 
       'Unpaused(address)': TypedContractEvent<UnpausedEvent.InputTuple, UnpausedEvent.OutputTuple, UnpausedEvent.OutputObject>;
       Unpaused: TypedContractEvent<UnpausedEvent.InputTuple, UnpausedEvent.OutputTuple, UnpausedEvent.OutputObject>;
-
+    
     };
   }

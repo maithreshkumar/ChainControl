@@ -275,7 +275,7 @@ function GenericList({ title, subtitle, endpoint }: { title: string; subtitle: s
 function NetworkPage() {
   const [health, setHealth] = useState<NetworkHealth | null>(null);
   useEffect(() => { api.get("/blockchain/health/").then((r) => setHealth(r.data)); }, []);
-  return <Page title="Blockchain health" subtitle="Live RPC checks across the four validators maintaining one QBFT ledger."><div className="validator-grid">{health?.validators.map((v) => <article className="panel validator" key={v.validator}><div className={v.healthy ? "node healthy" : "node"}><Network /></div><span>Validator {v.validator}</span><strong>{v.healthy ? "Operational" : "Unavailable"}</strong><small>Block {v.block_height ?? "—"}</small></article>) ?? <Empty text="Checking validator health…" />}</div></Page>;
+  return <Page title="Blockchain health" subtitle="Live RPC checks across the dynamically governed QBFT network."><div className="validator-grid">{health?.validators.map((v) => <article className="panel validator" key={v.validator}><div className={v.healthy ? "node healthy" : "node"}><Network /></div><span>Network node {v.validator}</span><strong>{v.healthy ? "Operational" : "Unavailable"}</strong><small>Block {v.block_height ?? "—"}</small></article>) ?? <Empty text="Checking validator health…" />}</div></Page>;
 }
 
 export default function App() {

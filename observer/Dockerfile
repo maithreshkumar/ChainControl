@@ -1,5 +1,7 @@
 FROM node:24-alpine AS build
 WORKDIR /app
+ARG VITE_LOCAL_RPC_URL=/rpc/
+ENV VITE_LOCAL_RPC_URL=${VITE_LOCAL_RPC_URL}
 COPY package*.json ./
 RUN npm ci
 COPY . .

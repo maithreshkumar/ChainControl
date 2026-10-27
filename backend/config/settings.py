@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "apps.accounts",
     "apps.identities",
     "apps.blockchain",
+    "apps.network",
     "apps.assets",
     "apps.inventory",
     "apps.audit",
@@ -113,6 +114,7 @@ CELERY_TASK_ACKS_LATE = True
 CELERY_BEAT_SCHEDULE = {
     "track-blockchain-receipts": {"task": "apps.blockchain.tasks.track_pending_transactions", "schedule": 10.0},
     "reconcile-assets": {"task": "apps.blockchain.tasks.reconcile_asset_ownership", "schedule": 60.0},
+    "monitor-network-nodes": {"task": "apps.network.tasks.monitor_network_nodes", "schedule": 30.0},
 }
 
 MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9000")
@@ -127,6 +129,29 @@ CHAIN_ID = int(os.getenv("CHAIN_ID", "1337"))
 BLOCKCHAIN_CONFIRMATIONS = int(os.getenv("BLOCKCHAIN_CONFIRMATIONS", "1"))
 BLOCKCHAIN_SIGNER_ADDRESS = os.getenv("BLOCKCHAIN_SIGNER_ADDRESS", "")
 BLOCKCHAIN_SIGNER_PRIVATE_KEY = os.getenv("BLOCKCHAIN_SIGNER_PRIVATE_KEY", "")
+
+NETWORK_NAME = os.getenv("NETWORK_NAME", "ChainControl Network")
+NETWORK_GENESIS_PATH = os.getenv("NETWORK_GENESIS_PATH", "/besu-config/genesis.json")
+BESU_PERMISSION_CONFIG_PATH = os.getenv("BESU_PERMISSION_CONFIG_PATH", "/besu-config/runtime/permissions_config.toml")
+BESU_STATIC_NODES_PATH = os.getenv("BESU_STATIC_NODES_PATH", "/besu-config/static-nodes.json")
+BESU_RUNTIME_STATIC_NODES_PATH = os.getenv("BESU_RUNTIME_STATIC_NODES_PATH", "/besu-config/runtime/static-nodes.json")
+BESU_EXTERNAL_P2P_HOST = os.getenv("BESU_EXTERNAL_P2P_HOST", "").strip()
+BESU_EXTERNAL_P2P_BASE_PORT = int(os.getenv("BESU_EXTERNAL_P2P_BASE_PORT", "30303"))
+BESU_MANAGED_RPC_URLS = [
+    value.strip()
+    for value in os.getenv(
+        "BESU_MANAGED_RPC_URLS",
+        "http://besu-validator-1:8545,http://besu-validator-2:8545,http://besu-validator-3:8545,http://besu-validator-4:8545",
+    ).split(",")
+    if value.strip()
+]
+NETWORK_NODE_OFFLINE_SECONDS = int(os.getenv("NETWORK_NODE_OFFLINE_SECONDS", "90"))
+
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+    "node_enrollment": os.getenv("NODE_ENROLLMENT_THROTTLE", "10/hour"),
+    "node_status": os.getenv("NODE_STATUS_THROTTLE", "120/minute"),
+    "node_heartbeat": os.getenv("NODE_HEARTBEAT_THROTTLE", "30/minute"),
+}
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"

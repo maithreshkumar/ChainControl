@@ -17,4 +17,4 @@ cd ..\frontend; npm test; npm run build
 cd ..\observer; npm run build
 ```
 
-Live Compose validation remains separate: start all four validators, prove advancing blocks, compare membership/heights, temporarily stop one node and observe behavior, then run inventory/NFT/Observer/decryption browser journeys. A same-host Compose run does not establish production fault tolerance.
+Live Compose validation remains separate: start the initial validators, prove advancing blocks, compare actual membership/heights, temporarily stop one node and observe behavior, then run inventory/NFT/Observer/decryption browser journeys. Decentralization acceptance additionally enrolls several independent data volumes and at least one physically separate overlay-connected host, verifies catch-up/new-block propagation/revocation, and performs real QBFT promotion/removal. A same-host Compose run does not establish production fault tolerance.

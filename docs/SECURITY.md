@@ -12,3 +12,9 @@
 - Administrative recovery requires a named active administrator, reason, Asset UUID, and explicit output. AES-GCM authentication and the registered SHA-256 must pass. Success and failure create `ADMIN_DECRYPT` events without key material.
 
 The development environment uses an environment-provided signer and master key. In the demo, storage administration and decryption authority may be controlled by the same operator. Production must separate them and migrate signing/key wrapping to HSM/KMS-backed services. MinIO credentials authorize object storage; they do not themselves decrypt asset data.
+
+## Besu membership security
+
+New nodes require an expiring single-use enrollment code, strict enode/public-key/address verification, unique identity, a scoped hashed node credential, and explicit Django superuser approval. Approval/revocation must be confirmed by the actual Besu `PERM` API before state changes are accepted. Validator authority additionally requires real QBFT voting.
+
+Remote RPC is loopback-only; only P2P is bound to the selected private-overlay address. Node private keys never enter Django, package archives, logs, or another computer. `PERM`, `ADMIN`, and `QBFT` management APIs must stay on Docker/private networks. See `NETWORK_SECURITY.md` for the threat boundaries and response guidance.

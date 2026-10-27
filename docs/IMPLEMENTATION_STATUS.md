@@ -18,4 +18,17 @@ Status reflects executed evidence on 15 September 2026 IST. `TESTED` is used onl
 | Administrative decryption utility | TESTED | Valid output, invalid UUID, authenticated failure, audit, no-key logging, and explicit cleanup tests pass |
 | Docker Compose live smoke test | TESTED | All 13 long-running services are up; main app, admin, observer, MinIO, auth, inventory, RPC, migrations, and live observer reads passed |
 
-Final verification: backend `43 passed`; frontend `10 passed`; contracts `5 passed`; both production frontends build; Django reports no configuration or migration drift; `git diff --check` is clean.
+## Decentralization upgrade — 25 September 2026 IST
+
+| Area | Status | Evidence / remaining boundary |
+|---|---|---|
+| Repository audit and migration plan | IMPLEMENTED | `DECENTRALIZATION_UPGRADE_PLAN.md`; chain ID 1337 and existing contract anchors recorded; no chain data changed |
+| Dynamic node registry/enrollment | TESTED | Token, identity validation, scoped credential, admission and rejection unit tests pass |
+| Besu permission propagation | PARTIALLY LIVE TESTED | All four preserved validators report the same enforced four-enode allowlist; add/remove failure semantics pass unit tests; remote mutation acceptance remains |
+| QBFT promotion/removal | TESTED (MOCKED) | Tests prove projection changes only after actual-set response and final validator is protected; live votes not executed |
+| Windows remote-node package | BUILD + KEYGEN TESTED | Self-contained archive and all images build; temporary-volume smoke test generated a unique 128-hex public key/address and cleaned up; remote enrollment remains |
+| Local Observer mode | LIVE TESTED | Local block reads and ABI bundle load; browser write/vote RPC is rejected 403; optional metadata requires authentication and degrades independently |
+| Live chain preservation | TESTED | Existing volumes retained; chain 1337 reached block 8587; canonical genesis SHA-256 is `f7c74cf20c85e0281ae1bf7508c761dccace45ac88526b0483e1370bc789b106`; deployed contract code remains present |
+| Dynamic global health/topology | LIVE TESTED | Four managed validators ONLINE at identical height with three peers each, matching actual validator set, healthy consensus, and six observed non-fabricated topology edges |
+
+This upgrade does not yet claim physical geographic decentralization. That claim requires the documented physically separate overlay-host enrollment/sync/reconnect/revocation test, followed by controlled live validator add/remove voting. The previously reported business tests remain historical evidence; the complete backend regression suite currently passes (`58 passed`), both React production builds pass, the Observer production dependency audit reports zero vulnerabilities, both Compose definitions validate, and Django reports no model drift.
